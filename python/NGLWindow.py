@@ -11,7 +11,7 @@ from OpenGL.GL import *
 import flock
 import time
 
-updateframes = 10
+updateframes = 5
 
 
 
@@ -35,8 +35,7 @@ class NGLWidget(QOpenGLWidget):
         self.ZOOM = 0.1
         self.modelPos = Vec3()
         self.flock = flock.Flock()
-        self.flock.AddBoid(50)
-        self.flock.AddPredator(5)
+
         self.flock.AddFood(7)
         self.startTimer(updateframes)
         self.start = False
@@ -192,133 +191,158 @@ class NGLWindow(QWidget):
         self.glWidget = NGLWidget(parent=self)
 
         self.sideTabs = QTabWidget()
-        tabOne = QGroupBox()
-        tabTwo = QGroupBox()
-        tabThree = QGroupBox()
+        self.tabOne = QGroupBox()
+        self.tabTwo = QGroupBox()
+        self.tabThree = QGroupBox()
 
-        startButtonA = QPushButton("Start Simulation")
-        startButtonA.clicked.connect(self.StartSim)
-        startButtonB = QPushButton("Start Simulation")
-        startButtonB.clicked.connect(self.StartSim)
+        self.startButtonA = QPushButton("Start Simulation")
+        self.startButtonA.clicked.connect(self.StartSim)
+        self.startButtonB = QPushButton("Start Simulation")
+        self.startButtonB.clicked.connect(self.StartSim)
+        self.startButtonC = QPushButton("Start Simulation")
+        self.startButtonC.clicked.connect(self.StartSim)
 
         # Tab 1 - Boids
 
-        BC = QLabel("Cohesion Weight")
-        boidCoh = QDoubleSpinBox()
-        boidCoh.setValue(1.0)
-        boidCoh.setMinimum(0)
-        boidCoh.setMaximum(10)
+        self.BC = QLabel("Cohesion Weight")
+        self.boidCoh = QDoubleSpinBox()
+        self.boidCoh.setValue(1.0)
+        self.boidCoh.setMinimum(0)
+        self.boidCoh.setMaximum(10)
 
-        BS = QLabel("Separation Weight")
-        boidSep = QDoubleSpinBox()
-        boidSep.setValue(1.75)
-        boidSep.setMinimum(0)
-        boidSep.setMaximum(10)
+        self.BS = QLabel("Separation Weight")
+        self.boidSep = QDoubleSpinBox()
+        self.boidSep.setValue(1.75)
+        self.boidSep.setMinimum(0)
+        self.boidSep.setMaximum(10)
 
-        BA = QLabel("Alignment Weight")
-        boidAli = QDoubleSpinBox()
-        boidAli.setValue(1.5)
-        boidAli.setMinimum(0)
-        boidAli.setMaximum(10)
+        self.BA = QLabel("Alignment Weight")
+        self.boidAli = QDoubleSpinBox()
+        self.boidAli.setValue(1.5)
+        self.boidAli.setMinimum(0)
+        self.boidAli.setMaximum(10)
 
-
-        vbox = QVBoxLayout()
-        vbox.addWidget(BC)
-        vbox.addWidget(boidCoh)
-        vbox.addWidget(BS)
-        vbox.addWidget(boidSep)
-        vbox.addWidget(BA)
-        vbox.addWidget(boidAli)
-        vbox.addStretch(1)
+        self.BN = QLabel("Number of Boids")
+        self.boidNum = QSpinBox()
+        self.boidNum.setValue(50)
+        self.boidNum.setMinimum(5)
+        self.boidNum.setMaximum(75)
 
 
-        vbox.addWidget(startButtonA)
-        tabOne.setLayout(vbox)
 
-        self.sideTabs.addTab(tabOne, "Boids")
+        self.vbox = QVBoxLayout()
+        self.vbox.addWidget(self.BN)
+        self.vbox.addWidget(self.boidNum)
+        self.vbox.addWidget(self.BC)
+        self.vbox.addWidget(self.boidCoh)
+        self.vbox.addWidget(self.BS)
+        self.vbox.addWidget(self.boidSep)
+        self.vbox.addWidget(self.BA)
+        self.vbox.addWidget(self.boidAli)
+        self.vbox.addStretch(1)
+
+        self.vbox.addWidget(self.startButtonA)
+        self.tabOne.setLayout(self.vbox)
+
+        self.sideTabs.addTab(self.tabOne, "Boids")
 
         # Tab 2 - Predators
 
-        PC = QLabel("Cohesion Weight (To Boids)")
-        predCoh = QDoubleSpinBox()
-        predCoh.setValue(2.0)
-        predCoh.setMinimum(0)
-        predCoh.setMaximum(10)
 
-        PS = QLabel("Separation Weight")
-        predSep = QDoubleSpinBox()
-        predSep.setValue(2.0)
-        predSep.setMinimum(0)
-        predSep.setMaximum(10)
+        self.PN = QLabel("Number of Predators")
+        self.predNum = QSpinBox()
+        self.predNum.setValue(5)
+        self.predNum.setMinimum(1)
+        self.predNum.setMaximum(10)
 
-        PA = QLabel("Alignment Weight")
-        predAli = QDoubleSpinBox()
-        predAli.setValue(0.3)
-        predAli.setMinimum(0)
-        predAli.setMaximum(10)
-
-        PAt = QLabel("Attack Weight")
-        predAt = QDoubleSpinBox()
-        predAt.setValue(2.0)
-        predAt.setMinimum(0)
-        predAt.setMaximum(10)
-
-        PR = QLabel("Random Movement Weight")
-        predR = QDoubleSpinBox()
-        predR.setValue(0.2)
-        predR.setMinimum(0)
-        predR.setMaximum(10)
-
-        PSi = QLabel("Sight Radius")
-        predSig = QSpinBox()
-        predSig.setValue(25)
-        predSig.setMinimum(1)
-        predSig.setMaximum(50)
+        self.PAt = QLabel("Attack Weight")
+        self.predAt = QDoubleSpinBox()
+        self.predAt.setValue(2.0)
+        self.predAt.setMinimum(0)
+        self. predAt.setMaximum(10)
 
 
-        PSp = QLabel("Maximum Speed")
-        predSp = QDoubleSpinBox()
-        predSp.setValue(0.35)
-        predSp.setMinimum(0.01)
-        predSp.setMaximum(1)
+
+        self.PSi = QLabel("Sight Radius")
+        self.predSig = QSpinBox()
+        self.predSig.setValue(25)
+        self.predSig.setMinimum(1)
+        self.predSig.setMaximum(50)
+
+        self.PSp = QLabel("Slowness")
+        self.predSp = QDoubleSpinBox()
+        self.predSp.setValue(0.35)
+        self.predSp.setMinimum(0.01)
+        self.predSp.setMaximum(1)
 
         # Begin Layout Design for Tab 1
-        pbox = QVBoxLayout()
-        pbox.addWidget(PC)
-        pbox.addWidget(predCoh)
-        pbox.addWidget(PS)
-        pbox.addWidget(predSep)
-        pbox.addWidget(PA)
-        pbox.addWidget(predAli)
-        pbox.addWidget(PAt)
-        pbox.addWidget(predAt)
-        pbox.addWidget(PR)
-        pbox.addWidget(predR)
-        pbox.addWidget(PSi)
-        pbox.addWidget(predSig)
-        pbox.addWidget(PSp)
-        pbox.addWidget(predSp)
-        pbox.addStretch(1)
-        pbox.addWidget(startButtonB)
-        tabTwo.setLayout(pbox)
+        self.pbox = QVBoxLayout()
+        self.pbox.addWidget(self.PN)
+        self.pbox.addWidget(self.predNum)
+        self.pbox.addWidget(self.PAt)
+        self.pbox.addWidget(self.predAt)
+
+        self.pbox.addWidget(self.PSi)
+        self.pbox.addWidget(self.predSig)
+        self.pbox.addWidget(self.PSp)
+        self.pbox.addWidget(self.predSp)
+        self.pbox.addStretch(1)
+        self.pbox.addWidget(self.startButtonB)
+        self.tabTwo.setLayout(self.pbox)
 
         # Add Tab to Stack
 
-        self.sideTabs.addTab(tabTwo, "Predators")
+        self.sideTabs.addTab(self.tabTwo, "Predators")
 
 
         # Tab 3 - Genetic Settings
 
-        self.sideTabs.addTab(tabThree, "Genetics")
+        self.GA = QLabel("Maximum Initial Awareness")
+        self.genAware = QDoubleSpinBox()
+        self.genAware.setValue(5.0)
+        self.genAware.setMinimum(1)
+        self.genAware.setMaximum(100)
 
+        self.GS = QLabel("Maximum Initial Strength")
+        self.genStr = QDoubleSpinBox()
+        self.genStr.setValue(0.2)
+        self.genStr.setMinimum(0.05)
+        self.genStr.setMaximum(5)
 
-        mainLayout = QHBoxLayout()
-        mainLayout.addWidget(self.glWidget)
+        self.GTR = QLabel("Maximum Initial Tiredness Rate")
+        self.genTired = QDoubleSpinBox()
+        self.genTired.setValue(0.05)
+        self.genTired.setMinimum(0.005)
+        self.genTired.setMaximum(1)
 
-        mainLayout.addWidget(self.sideTabs)
-        mainLayout.setStretch(0, 3)
-        mainLayout.setStretch(1, 1)
-        self.setLayout(mainLayout)
+        self.GRR = QLabel("Maximum Initial Recovery Rate")
+        self.genRecov = QDoubleSpinBox()
+        self.genRecov.setValue(0.01)
+        self.genRecov.setMinimum(0)
+        self.genRecov.setMaximum(1)
+
+        self.gbox = QVBoxLayout()
+        self.gbox.addWidget(self.GA)
+        self.gbox.addWidget(self.genAware)
+        self.gbox.addWidget(self.GS)
+        self.gbox.addWidget(self.genStr)
+        self.gbox.addWidget(self.GTR)
+        self.gbox.addWidget(self.genTired)
+        self.gbox.addWidget(self.GRR)
+        self.gbox.addWidget(self.genRecov)
+        self.gbox.addStretch(1)
+        self.gbox.addWidget(self.startButtonC)
+        self.tabThree.setLayout(self.gbox)
+
+        self.sideTabs.addTab(self.tabThree, "Genetics")
+
+        self.mainLayout = QHBoxLayout()
+        self.mainLayout.addWidget(self.glWidget)
+
+        self.mainLayout.addWidget(self.sideTabs)
+        self.mainLayout.setStretch(0, 3)
+        self.mainLayout.setStretch(1, 1)
+        self.setLayout(self.mainLayout)
 
 
 
@@ -326,6 +350,24 @@ class NGLWindow(QWidget):
             'Genetic Boids - Generation: ' + str(0) + 'MiniGen: ' + str(0) + '| ' + str(0) + '/' + str(0))
 
     def StartSim(self):
+        self.glWidget.flock.startTired = self.genTired.value().__float__()
+        self.glWidget.flock.startRecov = self.genRecov.value().__float__()
+        self.glWidget.flock.startStr = self.genStr.value().__float__()
+        self.glWidget.flock.startAware = self.genAware.value().__float__()
+        self.glWidget.flock.boidCohesion = self.boidCoh.value().__float__()
+        self.glWidget.flock.boidSeparation = self.boidSep.value().__float__()
+        self.glWidget.flock.boidAlignment = self.boidAli.value().__float__()
+        self.glWidget.flock.predSig = self.predSig.value().__float__()
+        self.glWidget.flock.predSpeed = self.predSp.value().__float__()
+        self.glWidget.flock.predAtt = self.predAt.value().__float__()
+
+        self.glWidget.flock.AddBoid(self.boidNum.value().__int__())
+        self.glWidget.flock.AddPredator(self.predNum.value().__int__())
+
+        self.startButtonA.deleteLater()
+        self.startButtonB.deleteLater()
+        self.startButtonC.deleteLater()
+
         self.glWidget.start=True
 
 if __name__ == '__main__':

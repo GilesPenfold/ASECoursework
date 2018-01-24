@@ -4,6 +4,9 @@ from random import choice
 from random import getrandbits
 from random import uniform
 import numpy as np
+import random
+
+sys_random = random.SystemRandom()
 
 # TODO
 # Add overall fitness to the boids in relation to food and time spent alive
@@ -26,9 +29,21 @@ class Flock():
         self.m_survivorCount = []
         self.bestBoid = None
 
+        self.startAware = kwargs.get('_aware',5)
+        self.startStr = kwargs.get('_str',0.2)
+        self.startTired = kwargs.get('_tired',0.05)
+        self.startRecov = kwargs.get('_recov',0.005)
+
+        self.boidCohesion = 1.75
+        self.boidAlignment = 1.5
+        self.boidSeparation = 2.0
+
+        self.predAtt = 2.0
+        self.predSig = 25
+        self.predSpeed = 0.35
+
 
     def Flock(self):
-        #self.m_boids[0].Flock(sample(self.m_boids,len(self.m_boids)/2))
         self.m_boids[0].Flock(self.m_boids, self.m_predators, self.m_food, self.bestBoid)
 
 
@@ -137,7 +152,9 @@ class Flock():
 
     def AddBoid(self, _i):
         for x in range(0,_i):
-            self.m_boids.append(boid2.Boid2(_id=x))
+            self.m_boids.append(boid2.Boid2(_id=x, _aware=random.uniform(1,self.startAware), _str=random.uniform(0.05,self.startStr), _rec=random.uniform(0,self.startRecov),
+                                            _tired=random.uniform(0.005,self.startTired), _globAlign=self.boidAlignment, _globCoh=self.boidCohesion, _globSep=self.boidSeparation))
+            random.seed(self.m_boids[x].GetRandomSeed())
             self.m_run.append(False)
 
     def BreedBoids(self, _mother, _father):
@@ -212,9 +229,10 @@ class Flock():
 
     def AddPredator(self, _i):
         for x in range(0,_i):
-            self.m_predators.append(boid2.Boid2(_id=x, _predator=True))
+            self.m_predators.append(boid2.Boid2(_id=x, _predator=True, _predAtt=self.predAtt, _predSig=self.predSig, _predSpeed=self.predSpeed))
 
     def Draw(self, _camera, _shader):
+
         for f in self.m_food:
             _shader.setUniform("Colour", 0.2, 0.2, 0.0, 1.0)
             f.Draw(_camera)

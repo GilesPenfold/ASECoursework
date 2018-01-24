@@ -1,17 +1,14 @@
 import numpy as np
 from pyngl import *
 import random
-import perceptron as p
 
-# Based from YABI implementation of flocking
+
+# Based from YABI implementation of flocking and processing.org
 
 sys_random = random.SystemRandom()
 
-# Boid Params
-WeightCohesion = 1.0
-WeightSeparation = 1.75
-WeightAlign = 1.5
-WeightRandom = 0.0
+# Boid Global Params
+WeightRandom = 0.05
 WeightSeek = 0.0
 WeightAvoidPredator = 0.2
 WeightSeekFood = 0.02
@@ -22,20 +19,17 @@ MaxForce = 0.05
 MinSeparation = 5
 CohesionDistance = 15.0
 
-# Predator Params
+# Predator Global Params
 PredatorRadius = 5
 PredatorKillRadius = 1
-PredatorSight  = 25
 PredatorWeightCohesion = 2.0
 PredatorWeightSelfCohesion = 0.0
 PredatorWeightSeparation = 2.0
 PredatorWeightAlign = 0.3
-PredatorWeightAttack = 2.0
 PredatorWeightRandom = 0.2
-PredatorMaxSpeed = 0.35
 PredatorMinSeparation = 3
 
-# World Params
+# World Params - Do not change
 Borders = np.array([56,56])
 
 
@@ -50,8 +44,16 @@ class Boid2():
 
         self.m_name = self.RandomNameGenerator()
 
-        # Neural Network
-        self.m_brain = p.Perceptron(_weights=2, _lr=0.001)
+        # GUI Variables
+
+        self.WeightCohesion = kwargs.get('_globCoh', 1.5)
+        self.WeightSeparation  = kwargs.get('_globSep', 2.0)
+        self.WeightAlign = kwargs.get('_globAlign', 1.75)
+
+        self.PredatorSight = kwargs.get('_predSig', 25)
+        self.PredatorWeightAttack = kwargs.get('_predAtt',2.0)
+        self.PredatorMaxSpeed = kwargs.get('_predSpeed',0.35)
+
 
         # Genetic algorithm params
         self.m_ticksAlive = 0
@@ -65,12 +67,12 @@ class Boid2():
         self.m_run = False
 
         # Genetic Adjustments
-        self.m_alignment = kwargs.get('_align', random.uniform(0.5,2))
-        self.m_cohesion = kwargs.get('_cohes', random.uniform(0.5, 2))
-        self.m_separation = kwargs.get('_sep', random.uniform(0.5, 2))
-        self.m_avoidance = kwargs.get('_avoid', random.uniform(0.5, 2))
-        self.m_random = kwargs.get('_random', random.uniform(0.5, 2))
-        self.m_food = kwargs.get('_food', random.uniform(0.5,2))
+        self.m_alignment = kwargs.get('_align', random.uniform(0.2,1))
+        self.m_cohesion = kwargs.get('_cohes', random.uniform(0.2, 1))
+        self.m_separation = kwargs.get('_sep', random.uniform(0.2, 1))
+        self.m_avoidance = kwargs.get('_avoid', random.uniform(0.2, 1))
+        self.m_random = kwargs.get('_random', random.uniform(0.2, 1))
+        self.m_food = kwargs.get('_food', random.uniform(0.2,1))
 
         # Fitness Scores
         self.m_fitness = 0
@@ -78,6 +80,8 @@ class Boid2():
         self.m_isPredator = kwargs.get('_predator', False)
 
         self.m_colour = kwargs.get('_colour', np.ones(3))
+
+
 
     def GetRandomSeed(self):
         token = ''
@@ -239,8 +243,9 @@ class Boid2():
                 p.m_acc += p.Steer(np.array([0, 0]), False, 0.008)
                 p.m_vel += p.m_acc
 
-                p.m_vel = p.Limit(p.m_vel, PredatorMaxSpeed)
+                p.m_vel = p.Limit(p.m_vel, p.PredatorMaxSpeed)
                 p.m_pos = p.m_pos + p.m_vel
+
 
                 p.Bordering()
 
@@ -320,9 +325,10 @@ class Boid2():
                     if b.m_dead == False:
                         diff = p.m_pos - b.m_pos
                         dist = np.sqrt(diff.dot(diff))
-                        if dist < PredatorSight:
+                        if dist < p.PredatorSight:
                             pAttack = pAttack - np.sqrt(diff.dot(diff))
-                pAttack = pAttack*PredatorWeightAttack
+                pAttack = pAttack*p.PredatorWeightAttack
+
 
                 # Extra Rule 5 - Randomness
                 randomness = np.random.uniform(-1, 1, 2) * PredatorWeightRandom
@@ -335,6 +341,7 @@ class Boid2():
 
                 # Reset acceleration
                 b.m_acc = np.zeros(2)
+
 
                 # Create counting variables
                 countC = 0
@@ -375,20 +382,20 @@ class Boid2():
                 if countC > 0:
                     cohesion = cohesion/countC
                     cohesion = b.Steer(cohesion, False, MaxForce)
-                cohesion = cohesion * WeightCohesion * b.m_cohesion
+                cohesion = cohesion * self.WeightCohesion * b.m_cohesion
 
                 # Rule 2 - Separation
 
                 if countS > 0:
                     separation = separation/countS
-                separation = separation * WeightSeparation * b.m_separation
+                separation = separation * self.WeightSeparation * b.m_separation
 
                 # Rule 3 - Alignment
 
                 if countA > 0:
                     alignment = alignment / countA
                     alignment = b.Limit(alignment, MaxForce)
-                alignment = alignment * WeightAlign * b.m_alignment
+                alignment = alignment * self.WeightAlign * b.m_alignment
 
 
                 # Extra Rule 4 - Randomness
